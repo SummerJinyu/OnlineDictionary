@@ -6,10 +6,10 @@ k = 200;            %(custom)k atoms
 x = zeros ([m,1]);  %signal
 D = rand(m,k);  %randomly initialized dictionary 
 lambda = 0.1;         %penalty
-tau = 1.0000e-04;   %stepsize of Lasso iteration
+tau = 1.0000e-04;   %stepsize of Lasso iteration 
+% less than 1/(||D||^2)
 diff = 0.00001;
 diff2 = 0.00001; % for dictionary update
-
 
 img = double(imread('Lenna.png'))/255;
 size(img);
@@ -22,9 +22,9 @@ colLength = (col-sm);
 pointSet = datasample(1:rowLength*colLength, T);
 p = zeros([m, T]);
 for t = 1:T
-    point = pointSet(t);
-    r = round(point/colLength)+1;
-    c = mod(point, colLength)+1; 
+    point = pointSet(t); % to get the position of the starting pixel
+    r = round(point/rowLength)+1; 
+    c = mod(point, rowLength)+1; 
     patch = img_red(r:(r+sm-1),c:(c+sm-1));
     p(:,t) = reshape(patch, [m,1]); 
 end
