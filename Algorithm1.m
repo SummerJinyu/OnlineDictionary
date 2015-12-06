@@ -10,23 +10,24 @@ D = rand(m,k);  %randomly initialized dictionary
 lambda = 0.1;         %penalty
 tau = 1.0000e-04;   %stepsize of Lasso iteration 
 % less than 1/(||D||^2)
-diff = 0.00001;
-diff2 = 0.00001; % for dictionary update
+diff = 0.0004;
+diff2 = 0.0001; % for dictionary update
+maxCount = 150; % max number of iteration for DictionaryUpadate()
 
 img = double(imread('Lenna.png'))/255;
 size(img);
 [row,col] = size(img(:,:,1));
 img_red = img(:,:,1);
 %set p(x)
-rowLength = (row-sm);
-colLength = (col-sm);
+nrow = (row-sm);
+ncol = (col-sm);
 % choose T samples from all possible patched WITH replacement
-pointSet = datasample(1:rowLength*colLength, T);
+pointSet = datasample(1:nrow*ncol, T);
 p = zeros([m, T]);
 for t = 1:T
     point = pointSet(t); % to get the position of the starting pixel
-    r = round(point/rowLength)+1; 
-    c = mod(point, rowLength)+1; 
+    r = round(point/ncol)+1; 
+    c = mod(point, ncol)+1; 
     patch = img_red(r:(r+sm-1),c:(c+sm-1));
     p(:,t) = reshape(patch, [m,1]); 
 end
@@ -50,11 +51,6 @@ for t = 1:T
     B2 = B1 + xt*wt';
     %Compute Dt using Alg 2, with D(t-1) as warm restart:
     aa = zeros([100 1]);
-    D2 = dictionaryUpdate(D1, A2, B2, m, k, diff2/sqrt(t),aa);
+    D2 = dictionaryUpdate(D1, A2, B2, m, k, diff2, maxCount, aa);
 end
-
-
-
-
-
 
