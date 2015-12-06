@@ -1,7 +1,7 @@
 %Online dictionary learning 
 T = 20000; 
 n = T;              %number of samples, the same as iteration times
-m = 100;            %(custom)
+m = 100;            %(custom)some square number
 k = 200;            %(custom)k atoms
 x = zeros ([m,1]);  %signal
 D = rand(m,k);  %randomly initialized dictionary 
