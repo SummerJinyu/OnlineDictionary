@@ -4,7 +4,7 @@ D2 = D1;
 D1 = D2 - 1;
 count = 0;
 diffnow = 100; % big number
-while (diffnow> diff)
+while (diffnow > diff)
     D1 = D2;
     for j = 1:k
         %update the j-th cols of D1:
@@ -16,7 +16,7 @@ while (diffnow> diff)
     if mod(count,100) == 0 
         diffnow
     end
-    %aa(count) = norm(D2-D1);
+    aa(count) = diffnow;
 end
 end
 
