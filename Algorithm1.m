@@ -1,5 +1,7 @@
+clear all
+
 %Online dictionary learning 
-T = 20000; 
+T = 2000; 
 n = T;              %number of samples, the same as iteration times
 sm = 10; m = sm*sm; %(custom)side-length of one patch
 k = 200;            %(custom)k atoms
