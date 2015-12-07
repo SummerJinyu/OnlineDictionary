@@ -13,8 +13,12 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
         countDataNew = lambdaGood * (1 - inpaintedMaskData);
         nNewPatch = 0; % count if there is new inpainted patch
         
-        iPatch = 1 + floor(rand() * sm);
-        while iPatch <= patchNum % travel thru all the patches, and randonly skip some of them :)
+        iPatch = 0;
+        while 1 % travel thru all the patches, and randomly skip some of them :)
+            iPatch = iPatch + 1 + floor(rand() * sm);
+            if iPatch > patchNum 
+                break
+            end
             if mod(iPatch,10000) == 0
                 iPatch
             end
@@ -38,8 +42,6 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
             [ir, ic] = getPatchPos(r, c, sm, iPatch);
             imgDataNew(ir:(ir+sm-1),ic:(ic+sm-1)) = imgDataNew(ir:(ir+sm-1),ic:(ic+sm-1)) + reshape(patchNew,[sm,sm]);
             countDataNew = countDataNew + maskPatch;
-            
-            iPatch = iPatch + 1 + floor(rand() * sm);
         end
         if nNewPatch == 0 % no new patch generated
             % This means all the holes is inpainted
