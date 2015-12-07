@@ -6,11 +6,11 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
     
     round = 0;
     inpaintedImgData = imgData;
-    inpaintedMaskData = maskData;
+    maskNeedInpaint = maskData;
     while 1 % repeat until all the 
         round = round + 1
-        imgDataNew = inpaintedImgData * (1 - inpaintedMaskData); % new image inpainted for the current interation 
-        countDataNew = lambdaGood * (1 - inpaintedMaskData);
+        imgDataNew = lambdaGood * (inpaintedImgData .* (1 - maskNeedInpaint)); % new image inpainted for the current interation 
+        countDataNew = lambdaGood * (1 - maskNeedInpaint);
         nNewPatch = 0; % count if there is new inpainted patch
         
         iPatch = 0;
@@ -22,8 +22,8 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
             if mod(iPatch,10000) == 0
                 iPatch
             end
-            patchInpaintMask = getPatch(inpaintedMaskData, sm, iPatch); % an mX1 (0,1)-mask indicates where in the patch to inpaint
-            nHole = sum(patchInpaintMask); % # of pixels that need to be recover
+            patchMaskNeedInpaint = getPatch(maskNeedInpaint, sm, iPatch); % an mX1 (0,1)-mask indicates where in the patch to inpaint
+            nHole = sum(patchMaskNeedInpaint); % # of pixels that need to be recover
             if (nHole == 0 || nHole > 3) 
                 % The patch is totally good,
                 % or too many area missing, wait for next iteration.
@@ -34,10 +34,11 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
             nNewPatch = nNewPatch + 1;
             patch = getPatch(imgData, sm, iPatch); % an mX1 column vector
             maskPatch = getPatchMask(r, c, sm, iPatch); % an rXc (0,1)-matrix indicates where is the patch
-            ind = find(patchInpaintMask == 1);
+            ind = find(patchMaskNeedInpaint ~= 1);
             iPatch
-            a = Lasso( dict(ind,:), patch(ind), tauLasso, diffLasso, lambdaLasso, rand(k,1));
-            'lasso'
+            %a = Lasso( dict(ind,:), patch(ind), tauLasso, diffLasso, lambdaLasso, rand(k,1));
+            a = lasso(dict(ind,:), patch(ind), 'Lambda', lambdaLasso);
+            % lasso ends
             patchNew = dict*a;
             [ir, ic] = getPatchPos(r, c, sm, iPatch);
             imgDataNew(ir:(ir+sm-1),ic:(ic+sm-1)) = imgDataNew(ir:(ir+sm-1),ic:(ic+sm-1)) + reshape(patchNew,[sm,sm]);
@@ -47,8 +48,8 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
             % This means all the holes is inpainted
             break
         end
-        inpaintedMaskData = (countDataNew ~= 0); % new mask
-        inpaintedImgData = imgDataNew / (inpaintedMaskData + countDataNew); % average inpainted parts, "+ countDataNew" is to avoid being divided by zero
+        maskNeedInpaint = (countDataNew == 0); % new mask
+        inpaintedImgData = imgDataNew ./ (maskNeedInpaint + countDataNew); % average inpainted parts, "+ countDataNew" is to avoid being divided by zero
     end
 end
 
