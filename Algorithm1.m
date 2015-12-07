@@ -7,7 +7,7 @@ sm = 10; m = sm*sm; %(custom)side-length of one patch
 k = 200;            %(custom)k atoms
 x = zeros ([m,1]);  %signal
 D = rand(m,k);  %randomly initialized dictionary 
-lambda = 0.1;         %penalty
+lambda = 0.01;         %penalty
 tau = 1.0000e-04;   %stepsize of Lasso iteration 
 % less than 1/(||D||^2)
 diff = 0.0004;
