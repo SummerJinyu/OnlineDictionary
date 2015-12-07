@@ -1,4 +1,4 @@
-function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, tauLasso, diffLasso, lambdaLasso)
+function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, lambdaLasso)
     m = sm * sm; % size of a patch
     k = length(dict); % # of atoms in the dictionary
     [r, c] = size(imgData); % # of rows and columns of the image
@@ -24,7 +24,7 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
             end
             patchMaskNeedInpaint = getPatch(maskNeedInpaint, sm, iPatch); % an mX1 (0,1)-mask indicates where in the patch to inpaint
             nHole = sum(patchMaskNeedInpaint); % # of pixels that need to be recover
-            if (nHole == 0 || nHole > 3) 
+            if (nHole == 0 || nHole > sm) 
                 % The patch is totally good,
                 % or too many area missing, wait for next iteration.
                 % nothing need to be done here.
@@ -37,15 +37,16 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
             ind = find(patchMaskNeedInpaint ~= 1);
             iPatch
             %a = Lasso( dict(ind,:), patch(ind), tauLasso, diffLasso, lambdaLasso, rand(k,1));
-            a = lasso(dict(ind,:), patch(ind), 'Lambda', lambdaLasso);
+            [a, fitinfo] = lasso(dict(ind,:), patch(ind), 'Lambda', lambdaLasso);
             % lasso ends
-            patchNew = dict*a;
+            patchNew = dict*a + fitinfo.Intercept;
             [ir, ic] = getPatchPos(r, c, sm, iPatch);
             imgDataNew(ir:(ir+sm-1),ic:(ic+sm-1)) = imgDataNew(ir:(ir+sm-1),ic:(ic+sm-1)) + reshape(patchNew,[sm,sm]);
             countDataNew = countDataNew + maskPatch;
         end
         maskNeedInpaint = (countDataNew == 0); % new mask
         inpaintedImgData = imgDataNew ./ (maskNeedInpaint + countDataNew); % average inpainted parts, "+ countDataNew" is to avoid being divided by zero
+        inpimg = inpaintedImgData; % for debug use
         
         if sum(sum(maskNeedInpaint)) == 0
             % this means all is inpainted
