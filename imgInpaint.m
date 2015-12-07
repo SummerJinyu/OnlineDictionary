@@ -11,7 +11,7 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
         round = round + 1
         imgDataNew = lambdaGood * (inpaintedImgData .* (1 - maskNeedInpaint)); % new image inpainted for the current interation 
         countDataNew = lambdaGood * (1 - maskNeedInpaint);
-        nNewPatch = 0; % count if there is new inpainted patch
+        % nNewPatch = 0; % count if there is new inpainted patch
         
         iPatch = 0;
         while 1 % travel thru all the patches, and randomly skip some of them :)
@@ -31,8 +31,8 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
                 continue
             end
             % the hole is small enough in the patch so we can inpaint it in this interation
-            nNewPatch = nNewPatch + 1;
-            patch = getPatch(imgData, sm, iPatch); % an mX1 column vector
+            % nNewPatch = nNewPatch + 1;
+            patch = getPatch(inpaintedImgData, sm, iPatch); % an mX1 column vector
             maskPatch = getPatchMask(r, c, sm, iPatch); % an rXc (0,1)-matrix indicates where is the patch
             ind = find(patchMaskNeedInpaint ~= 1);
             iPatch
@@ -44,12 +44,13 @@ function inpaintedImgData = imgInpaint(imgData, maskData, dict, sm, lambdaGood, 
             imgDataNew(ir:(ir+sm-1),ic:(ic+sm-1)) = imgDataNew(ir:(ir+sm-1),ic:(ic+sm-1)) + reshape(patchNew,[sm,sm]);
             countDataNew = countDataNew + maskPatch;
         end
-        if nNewPatch == 0 % no new patch generated
-            % This means all the holes is inpainted
-            break
-        end
         maskNeedInpaint = (countDataNew == 0); % new mask
         inpaintedImgData = imgDataNew ./ (maskNeedInpaint + countDataNew); % average inpainted parts, "+ countDataNew" is to avoid being divided by zero
+        
+        if sum(sum(maskNeedInpaint)) == 0
+            % this means all is inpainted
+            break
+        end
     end
 end
 

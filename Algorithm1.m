@@ -1,17 +1,17 @@
 clear all
 
 %Online dictionary learning 
-T = 2000; 
+T = 20000; 
 n = T;              %number of samples, the same as iteration times
 sm = 10; m = sm*sm; %(custom)side-length of one patch
 k = 200;            %(custom)k atoms
 x = zeros ([m,1]);  %signal
 D = rand(m,k);  %randomly initialized dictionary 
 lambda = 0.01;         %penalty
-tau = 1.0000e-04;   %stepsize of Lasso iteration 
+% tau = 1.0000e-04;   %stepsize of Lasso iteration 
 % less than 1/(||D||^2)
-diff = 0.0004;
-diff2 = 0.0001; % for dictionary update
+% diff = 0.0004;
+diff2 = 1e-5; % for dictionary update
 maxCount = 150; % max number of iteration for DictionaryUpadate()
 
 img = double(imread('Lenna.png'))/255;
@@ -46,7 +46,8 @@ for t = 1:T
     xt = p(:,t); 
     %spare coding: compute using LASSO
     w0 = ones([k, 1]);
-    wt = Lasso(D1, xt, tau, diff, lambda, w0);
+    % wt = Lasso(D1, xt, tau, diff, lambda, w0);
+    wt = lasso(D1, xt, 'lambda', lambda);
     A2 = A1 + wt*wt';
     B2 = B1 + xt*wt';
     %Compute Dt using Alg 2, with D(t-1) as warm restart:
